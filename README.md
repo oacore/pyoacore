@@ -1,6 +1,14 @@
 # pyoacore
+
+[![Build Status](https://travis-ci.org/oacore/pyoacore.svg?branch=master)](https://travis-ci.org/oacore/pyoacore) 
+[![Gitter chat](https://badges.gitter.im/org.png)](https://gitter.im/oacore-mozsprint17/Lobby)
+
 Python client for the CORE APIs
 
+
+## Mozilla Global Sprint '17
+This repository is one of our project for the Mozilla Global Sprint '17. 
+![Global Sprint](https://cloud.githubusercontent.com/assets/617994/24632585/b2b07dcc-1892-11e7-91cf-f9e473187cf7.png)
 We started this project by generating a simple API client from the [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) project:
 
 
