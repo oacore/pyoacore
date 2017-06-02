@@ -17,9 +17,11 @@ import urllib3
 
 import sys
 import logging
+import os
 
 from six import iteritems
 from six.moves import http_client as httplib
+
 
 
 def singleton(cls, *args, **kw):
@@ -53,7 +55,12 @@ class Configuration(object):
 
         # Authentication Settings - DO NOT USE THIS IN PRODUCTION
         # dict to store API key(s)
-        self.api_key = {"apiKey" : "btYj73TKGQahoUzL41yHANnJVeClvPIX"}
+
+        api_key = os.environ["CORE_API_KEY"]
+        if not api_key:
+            raise ValueError('The environment variable that is supposed to host the CORE API key is not set. '
+                             'Have you try to set CORE_API_KEY with your key?')
+        self.api_key = {"apiKey": api_key}
         # dict to store API prefix (e.g. Bearer)
         self.api_key_prefix = {}
         # Username for HTTP basic authentication
