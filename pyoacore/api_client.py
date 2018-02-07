@@ -17,6 +17,7 @@ import json
 import mimetypes
 import tempfile
 import threading
+import requests
 
 from datetime import date, datetime
 
@@ -114,10 +115,13 @@ class ApiClient(object):
             path_params = self.sanitize_for_serialization(path_params)
             path_params = self.parameters_to_tuples(path_params,
                                                     collection_formats)
+
             for k, v in path_params:
                 resource_path = resource_path.replace(
-                    '{%s}' % k, quote(str(v), safe=''))  # no safe chars, encode everything
+                        '{%s}' % k, quote(str(v), safe=''))  # no safe chars, encode everything
 
+        # auth setting
+        self.update_params_for_auth(header_params, query_params, auth_settings)
         # query parameters
         if query_params:
             query_params = self.sanitize_for_serialization(query_params)
@@ -131,27 +135,24 @@ class ApiClient(object):
             post_params = self.parameters_to_tuples(post_params,
                                                     collection_formats)
 
-        # auth setting
-        self.update_params_for_auth(header_params, query_params, auth_settings)
-
         # body
         if body:
             body = self.sanitize_for_serialization(body)
 
         # request url
         url = self.host + resource_path
-        print(query_params)
         # perform request and return response
-        response_data = self.request(method, url,
-                                     query_params=query_params,
-                                     headers=header_params,
-                                     post_params=post_params, body=body,
-                                     _preload_content=_preload_content,
-                                     _request_timeout=_request_timeout)
+
+
+        if method == "GET":
+            response_data = requests.get(url, params=query_params, headers=header_params, data=body);
+        elif method == "POST":
+            response_data = requests.post(url, params=query_params, headers=header_params)
+
+        print(response_data.url)
+
         self.last_response = response_data
-        print(response_data.data)
-        responseobj = json.loads(response_data.data)
-        print(responseobj["data"])
+        responseobj = response_data.json()
         return_data = responseobj["data"]
         if _preload_content:
             # deserialize response data
@@ -162,11 +163,11 @@ class ApiClient(object):
             if _return_http_data_only:
                 callback(return_data)
             else:
-                callback((return_data, response_data.status, response_data.getheaders()))
+                callback((return_data, response_data.status, response_data.headers))
         elif _return_http_data_only:
             return (return_data)
         else:
-            return (return_data, response_data.status, response_data.getheaders())
+            return (return_data, response_data.status, response_data.headers)
 
     def sanitize_for_serialization(self, obj):
         """
@@ -393,8 +394,8 @@ class ApiClient(object):
                                            body=body)
         else:
             raise ValueError(
-                "http method must be `GET`, `HEAD`, `OPTIONS`,"
-                " `POST`, `PATCH`, `PUT` or `DELETE`."
+                    "http method must be `GET`, `HEAD`, `OPTIONS`,"
+                    " `POST`, `PATCH`, `PUT` or `DELETE`."
             )
 
     def parameters_to_tuples(self, params, collection_formats):
@@ -423,7 +424,7 @@ class ApiClient(object):
                     else:  # csv is the default
                         delimiter = ','
                     new_params.append(
-                        (k, delimiter.join(str(value) for value in v)))
+                            (k, delimiter.join(str(value) for value in v)))
             else:
                 new_params.append((k, v))
         return new_params
@@ -450,8 +451,8 @@ class ApiClient(object):
                     with open(n, 'rb') as f:
                         filename = os.path.basename(f.name)
                         filedata = f.read()
-                        mimetype = mimetypes.\
-                            guess_type(filename)[0] or 'application/octet-stream'
+                        mimetype = mimetypes. \
+                                       guess_type(filename)[0] or 'application/octet-stream'
                         params.append(tuple([k, tuple([filename, filedata, mimetype])]))
 
         return params
@@ -499,7 +500,6 @@ class ApiClient(object):
         :param auth_settings: Authentication setting identifiers list.
         """
         config = Configuration()
-
         if not auth_settings:
             return
         for auth in auth_settings:
@@ -515,7 +515,7 @@ class ApiClient(object):
                     querys[auth_setting['key']] = auth_setting['value']
                 else:
                     raise ValueError(
-                        'Authentication token must be in `query` or `header`'
+                            'Authentication token must be in `query` or `header`'
                     )
 
     def __deserialize_file(self, response):
@@ -534,8 +534,8 @@ class ApiClient(object):
 
         content_disposition = response.getheader("Content-Disposition")
         if content_disposition:
-            filename = re.\
-                search(r'filename=[\'"]?([^\'"\s]+)[\'"]?', content_disposition).\
+            filename = re. \
+                search(r'filename=[\'"]?([^\'"\s]+)[\'"]?', content_disposition). \
                 group(1)
             path = os.path.join(os.path.dirname(path), filename)
 
@@ -582,8 +582,8 @@ class ApiClient(object):
             return string
         except ValueError:
             raise ApiException(
-                status=0,
-                reason="Failed to parse `{0}` into a date object".format(string)
+                    status=0,
+                    reason="Failed to parse `{0}` into a date object".format(string)
             )
 
     def __deserialize_datatime(self, string):
@@ -602,11 +602,11 @@ class ApiClient(object):
             return string
         except ValueError:
             raise ApiException(
-                status=0,
-                reason=(
-                    "Failed to parse `{0}` into a datetime object"
-                    .format(string)
-                )
+                    status=0,
+                    reason=(
+                        "Failed to parse `{0}` into a datetime object"
+                            .format(string)
+                    )
             )
 
     def __deserialize_model(self, data, klass):
@@ -624,8 +624,8 @@ class ApiClient(object):
 
         for attr, attr_type in iteritems(instance.swagger_types):
             if data is not None \
-               and instance.attribute_map[attr] in data \
-               and isinstance(data, (list, dict)):
+                    and instance.attribute_map[attr] in data \
+                    and isinstance(data, (list, dict)):
                 value = data[instance.attribute_map[attr]]
                 setattr(instance, attr, self.__deserialize(value, attr_type))
 
