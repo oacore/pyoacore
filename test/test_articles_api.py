@@ -65,8 +65,8 @@ class TestArticlesApi(unittest.TestCase):
         Search articles
 
         """
-        results = self.api.articles_search_api_call(
-                {"query": "repositories.id:(88)", "page": 1, "pageSize": 10, "fulltext": True})
+        results = self.api.articles_search_api_call(query="repositories.id:27", page=1, pageSize=1000,
+                                                    fulltext=False)
         print(results)
         assert len(results) > 0
         pass
