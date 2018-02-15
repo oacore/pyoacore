@@ -55,11 +55,13 @@ class Configuration(object):
 
         # Authentication Settings - DO NOT USE THIS IN PRODUCTION
         # dict to store API key(s)
-
-        api_key = os.environ["CORE_API_KEY"]
-        if not api_key:
-            raise ValueError('The environment variable that is supposed to host the CORE API key is not set. '
+        if os.environ["CORE_API_KEY"]:
+            api_key = os.environ["CORE_API_KEY"]
+            if not api_key:
+                raise ValueError('The environment variable that is supposed to host the CORE API key is not set. '
                              'Have you try to set CORE_API_KEY with your key?')
+        else:
+            api_key=None
         self.api_key = {"apiKey": api_key}
         # dict to store API prefix (e.g. Bearer)
         self.api_key_prefix = {}

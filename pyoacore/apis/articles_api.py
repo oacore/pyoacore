@@ -32,8 +32,6 @@ class ArticlesApi(object):
 
     def __init__(self, api_client=None):
         config = Configuration()
-        print('aaa')
-        print(config.api_key)
         if api_client:
             self.api_client = api_client
         else:
@@ -200,7 +198,6 @@ class ArticlesApi(object):
                 )
             params[key] = val
         del params['kwargs']
-        print(params)
 
         # verify the required parameter 'core_id' is set
         if ('query' not in params) or (params['query'] is None):
